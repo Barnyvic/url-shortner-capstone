@@ -4,7 +4,7 @@ import shortid from 'shortid';
 import { Request, Response } from 'express';
 import validUrl from 'valid-url';
 import { errorResponse, handleError, successResponse } from '../utils/response';
-import client from '../Config/redis';
+// import client from '../Config/redis';
 import qrcode from 'qrcode';
 
 export const createShortUrl = async (req: Request, res: Response) => {
@@ -72,7 +72,7 @@ export const createShortUrl = async (req: Request, res: Response) => {
         }
 
         //set the shortUrl in redis
-        client.setEx(generatedShortUrl.shortUrl, 3600, longUrl);
+        // client.setEx(generatedShortUrl.shortUrl, 3600, longUrl);
 
         return successResponse(
             res,
@@ -92,12 +92,9 @@ export const getShortUrl = async (req: Request, res: Response) => {
 
 
     // Check if the shortened URL exists in the cache
-    const response = await client.get(shortCodeID);
+    // const response = await client.get(shortCodeID);
 
-    if (response !== null) {
-        return res.redirect(response);
-    } else {
-        const shortUrl = await ShortUrl.findOne({
+    const shortUrl = await ShortUrl.findOne({
             shortUrl: shortCodeID,
             userId: user,
         });
@@ -106,7 +103,20 @@ export const getShortUrl = async (req: Request, res: Response) => {
         shortUrl.clicks++;
         shortUrl.save();
         res.redirect(shortUrl.longUrl);
-    }
+
+    // if (response !== null) {
+    //     return res.redirect(response);
+    // } else {
+    //     const shortUrl = await ShortUrl.findOne({
+    //         shortUrl: shortCodeID,
+    //         userId: user,
+    //     });
+    //     if (shortUrl == null || !shortUrl)
+    //         return successResponse(res, 404, 'Url not found');
+    //     shortUrl.clicks++;
+    //     shortUrl.save();
+    //     res.redirect(shortUrl.longUrl);
+    // }
 };
 
 export const getShortUrlQRCode = async (req: Request, res: Response) => {
