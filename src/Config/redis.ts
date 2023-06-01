@@ -2,7 +2,7 @@ import { createClient } from "redis";
 
 
 
-const redisUrl = 'rediss://red-chs4qr9mbg582kfr8210:zUG8Tw6sIRflrpqzDyauL9sKxBIN5CnT@oregon-redis.render.com:6379';
+const redisUrl = process.env.REDIS_URL 
 
 const client = createClient({
   url: redisUrl,

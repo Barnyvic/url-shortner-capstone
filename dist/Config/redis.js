@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const redis_1 = require("redis");
-const redisUrl = 'rediss://red-chs4qr9mbg582kfr8210:zUG8Tw6sIRflrpqzDyauL9sKxBIN5CnT@oregon-redis.render.com:6379';
+const redisUrl = process.env.REDIS_URL;
 const client = (0, redis_1.createClient)({
     url: redisUrl,
 });

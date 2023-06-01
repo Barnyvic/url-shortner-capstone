@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // routes
-app.use("/api/v1/shorturl", shortUrlRouter);
+app.use("/", shortUrlRouter);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("Express + TypeScript Server");

@@ -21,7 +21,7 @@ app.use(express_1.default.json());
 app.use(express_1.default.urlencoded({ extended: false }));
 app.use((0, cookie_parser_1.default)());
 // routes
-app.use("/api/v1/shorturl", shortUrl_router_1.default);
+app.use("/", shortUrl_router_1.default);
 app.get("/", (req, res) => {
     res.send("Express + TypeScript Server");
 });
