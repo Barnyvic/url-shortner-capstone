@@ -18,7 +18,7 @@ const userModel_1 = __importDefault(require("../model/userModel"));
 const shortid_1 = __importDefault(require("shortid"));
 const valid_url_1 = __importDefault(require("valid-url"));
 const response_1 = require("../utils/response");
-// import client from '../Config/redis';
+const redis_1 = __importDefault(require("../Config/redis"));
 const qrcode_1 = __importDefault(require("qrcode"));
 const createShortUrl = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -77,7 +77,7 @@ const createShortUrl = (req, res) => __awaiter(void 0, void 0, void 0, function*
             });
         }
         //set the shortUrl in redis
-        // client.setEx(generatedShortUrl.shortUrl, 3600, longUrl);
+        redis_1.default.setEx(generatedShortUrl.shortUrl, 3600, longUrl);
         return (0, response_1.successResponse)(res, 201, 'Url Created Successfully.', baseUrl + '/' + generatedShortUrl.shortUrl);
     }
     catch (error) {
@@ -90,20 +90,8 @@ const getShortUrl = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const user = req.cookies.userId;
     const { shortCodeID } = req.params;
     // Check if the shortened URL exists in the cache
-    // const response = await client.get(shortCodeID);
-    const shortUrl = yield shortUrlModel_1.default.findOne({
-        shortUrl: shortCodeID,
-        userId: user,
-    });
-    if (shortUrl == null || !shortUrl)
-        return (0, response_1.successResponse)(res, 404, 'Url not found');
-    shortUrl.clicks++;
-    shortUrl.save();
-    res.redirect(shortUrl.longUrl);
-    // if (response !== null) {
-    //     return res.redirect(response);
-    // } else {
-    //     const shortUrl = await ShortUrl.findOne({
+    const response = yield redis_1.default.get(shortCodeID);
+    // const shortUrl = await ShortUrl.findOne({
     //         shortUrl: shortCodeID,
     //         userId: user,
     //     });
@@ -112,7 +100,20 @@ const getShortUrl = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     //     shortUrl.clicks++;
     //     shortUrl.save();
     //     res.redirect(shortUrl.longUrl);
-    // }
+    if (response !== null) {
+        return res.redirect(response);
+    }
+    else {
+        const shortUrl = yield shortUrlModel_1.default.findOne({
+            shortUrl: shortCodeID,
+            userId: user,
+        });
+        if (shortUrl == null || !shortUrl)
+            return (0, response_1.successResponse)(res, 404, 'Url not found');
+        shortUrl.clicks++;
+        shortUrl.save();
+        res.redirect(shortUrl.longUrl);
+    }
 });
 exports.getShortUrl = getShortUrl;
 const getShortUrlQRCode = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
