@@ -12,5 +12,5 @@ const router = Router();
 router.get("/:shortCodeID", getShortUrl);
 router.post("/create", createShortUrl);
 router.get("/qrcode/:shortCodeID", getShortUrlQRCode);
-// router.get("/user/history", getAllShortUrls);
+router.get("/user/history", getAllShortUrls);
 export default router;
