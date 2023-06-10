@@ -3,11 +3,11 @@ import User from '../model/userModel';
 import shortid from 'shortid';
 import { Request, Response } from 'express';
 import validUrl from 'valid-url';
-import { errorResponse, handleError, successResponse } from '../utils/response';
+import { IRequest, errorResponse, handleError, successResponse } from '../utils/response';
 import client from '../Config/redis';
 import qrcode from 'qrcode';
 
-export const createShortUrl = async (req: Request, res: Response) => {
+export const createShortUrl = async (req:  IRequest, res: Response) => {
     try {
         //get the long longurl and customed url from the request body
         const { longUrl, customedUrl } = req.body as {
@@ -21,11 +21,11 @@ export const createShortUrl = async (req: Request, res: Response) => {
 
         //check if the longUrl is valid
         if (!validUrl.isUri(longUrl)) {
-            return res.status(400).json('Invalid Url Provided....');
+            return errorResponse(res, 400, 'Invalid long url.');
         }
 
         //get userId from the cookie
-        const userId = req.cookies.userId;
+        const userId = req.user._id
 
         if (userId) {
             //find the user with the userId
@@ -38,36 +38,17 @@ export const createShortUrl = async (req: Request, res: Response) => {
                     userId: user._id,
                 });
             } else {
-                res.clearCookie('userId');
-                const newUser = await User.create({
-                    cookieId: shortid.generate(),
-                    ipAddress: req.ip,
-                    userAgent: req.headers['user-agent'],
-                });
                 generatedShortUrl = await ShortUrl.create({
                     longUrl,
                     shortUrl: customedUrl || shortid.generate(),
-                    userId: newUser._id,
-                });
-                res.cookie('userId', newUser._id, {
-                    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-                    httpOnly: true,
+                    userId: user._id,
                 });
             }
         } else {
-            const newUser = await User.create({
-                cookieId: shortid.generate(),
-                ipAddress: req.ip,
-                userAgent: req.headers['user-agent'],
-            });
             generatedShortUrl = await ShortUrl.create({
                 longUrl,
                 shortUrl: customedUrl || shortid.generate(),
-                userId: newUser._id,
-            });
-            res.cookie('userId', newUser._id, {
-                expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-                httpOnly: true,
+                userId: userId,
             });
         }
 
@@ -94,16 +75,6 @@ export const getShortUrl = async (req: Request, res: Response) => {
     // Check if the shortened URL exists in the cache
     const response = await client.get(shortCodeID);
 
-    // const shortUrl = await ShortUrl.findOne({
-    //         shortUrl: shortCodeID,
-    //         userId: user,
-    //     });
-    //     if (shortUrl == null || !shortUrl)
-    //         return successResponse(res, 404, 'Url not found');
-    //     shortUrl.clicks++;
-    //     shortUrl.save();
-    //     res.redirect(shortUrl.longUrl);
-
     if (response !== null) {
         return res.redirect(response);
     } else {
@@ -124,10 +95,9 @@ export const getShortUrlQRCode = async (req: Request, res: Response) => {
     const { shortCodeID } = req.params;
 
     // Check if the shortened URL exists in the cache
-
+  console.log(shortCodeID)
     const shortUrl = await ShortUrl.findOne({
         shortUrl: shortCodeID,
-        userId: user,
     });
     if (shortUrl == null || !shortUrl)
         return successResponse(res, 404, 'Url not found');

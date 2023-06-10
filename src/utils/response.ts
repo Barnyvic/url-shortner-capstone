@@ -22,4 +22,8 @@ function handleError(req: Request, error: any) {
     `);
 }
 
+export interface IRequest  extends Request{
+  user: any
+}
+
 export { errorResponse, successResponse, handleError };

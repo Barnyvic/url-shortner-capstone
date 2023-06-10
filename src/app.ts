@@ -4,6 +4,8 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import shortUrlRouter from "./router/shortUrl.router";
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cors = require('cors');
 
 const app: Express = express();
 app.use(helmet());
@@ -15,6 +17,14 @@ app.use(
     message: "Too many requests from this IP, please try again later",
   })
 );
+
+// cors
+app.use(cors(
+  {
+    origin: '*',
+  }
+));
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
