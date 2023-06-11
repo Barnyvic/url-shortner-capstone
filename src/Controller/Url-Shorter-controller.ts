@@ -68,7 +68,6 @@ export const createShortUrl = async (req:  IRequest, res: Response) => {
 };
 
 export const getShortUrl = async (req: Request, res: Response) => {
-    const user = req.cookies.userId;
     const { shortCodeID } = req.params;
 
 
@@ -80,7 +79,6 @@ export const getShortUrl = async (req: Request, res: Response) => {
     } else {
         const shortUrl = await ShortUrl.findOne({
             shortUrl: shortCodeID,
-            userId: user,
         });
         if (shortUrl == null || !shortUrl)
             return successResponse(res, 404, 'Url not found');
@@ -95,7 +93,6 @@ export const getShortUrlQRCode = async (req: Request, res: Response) => {
     const { shortCodeID } = req.params;
 
     // Check if the shortened URL exists in the cache
-  console.log(shortCodeID)
     const shortUrl = await ShortUrl.findOne({
         shortUrl: shortCodeID,
     });

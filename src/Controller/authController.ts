@@ -10,6 +10,10 @@ export const register = async (req: Request, res: Response) => {
     try {
         const { email, password, fullName } = req.body;
 
+        if(!email || !password || !fullName) {
+            return errorResponse(res, 400, "All fields are required");
+        }
+
       const userExist = await User.findOne({ email });
         if (userExist) {
             return errorResponse(res, 400, "User already exist");
@@ -41,6 +45,11 @@ export const login = async (req: Request, res: Response) => {
         
 
          const { email, password } = req.body;
+
+          if(!email || !password) {
+            return errorResponse(res, 400, "All fields are required");
+        }
+
       const user = await User.findOne({ email });
 
       if(!user || !user.comparePassword(password) ) {
@@ -66,7 +75,6 @@ export const login = async (req: Request, res: Response) => {
      } catch (error) {
             handleError(req, error);
             return errorResponse(res, 500, 'Server error.');
-        
      }
 
 

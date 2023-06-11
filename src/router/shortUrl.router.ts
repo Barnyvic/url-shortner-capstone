@@ -11,7 +11,7 @@ import verifyToken from "../middleware/verifyToken";
 
 const router = Router();
 
-router.get("/:shortCodeID", verifyToken, getShortUrl);
+router.get("/:shortCodeID", getShortUrl);
 router.post("/create",verifyToken ,createShortUrl);
 router.get("/qr/:shortCodeID",verifyToken ,getShortUrlQRCode);
 router.get("/user/history", verifyToken,getAllShortUrls);
