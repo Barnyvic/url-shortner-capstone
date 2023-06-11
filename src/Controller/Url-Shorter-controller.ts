@@ -89,7 +89,6 @@ export const getShortUrl = async (req: Request, res: Response) => {
 };
 
 export const getShortUrlQRCode = async (req: Request, res: Response) => {
-    const user = req.cookies.userId;
     const { shortCodeID } = req.params;
 
     // Check if the shortened URL exists in the cache
@@ -106,10 +105,19 @@ export const getShortUrlQRCode = async (req: Request, res: Response) => {
 };
 
 //get all the shortUrls created by the user
-export const getAllShortUrls = async (req: Request, res: Response) => {
+export const getUserHistory = async (req: IRequest, res: Response) => {
     try {
-        const userId = req.cookies.userId;
-        const shortUrls = await ShortUrl.find({ userId }).populate('userId');
+        const userId =      req.user._id
+        const shortUrls = await ShortUrl.find({ userId }).populate('userId',{
+            fullName: 1,
+            ipAddress: 1,
+            userAgent: 1,
+        });
+
+
+        if(!shortUrls || shortUrls.length === 0) return successResponse(res, 404, 'No short urls found' 
+        );
+
         return successResponse(res, 200, 'Short Urls', shortUrls);
     } catch (error) {
         handleError(req, error);
