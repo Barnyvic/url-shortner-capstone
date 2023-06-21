@@ -22,12 +22,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importStar(require("mongoose"));
-const bcrypt_1 = __importDefault(require("bcrypt"));
 const userSchema = new mongoose_1.Schema({
     email: {
         type: String,
@@ -50,9 +46,6 @@ const userSchema = new mongoose_1.Schema({
         type: String,
     },
 }, { timestamps: true });
-userSchema.methods.comparePassword = function (password) {
-    return bcrypt_1.default.compareSync(password, this.password);
-};
 const User = mongoose_1.default.model("User", userSchema);
 exports.default = User;
 //# sourceMappingURL=userModel.js.map

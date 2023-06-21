@@ -16,7 +16,8 @@ exports.login = exports.register = void 0;
 const userModel_1 = __importDefault(require("../model/userModel"));
 const response_1 = require("../utils/response");
 const bcrypt_1 = __importDefault(require("bcrypt"));
-const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const comparePassward_1 = require("../helper/comparePassward");
+const JwtHelper_1 = require("../helper/JwtHelper");
 const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { email, password, fullName } = req.body;
@@ -51,25 +52,23 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             return (0, response_1.errorResponse)(res, 400, "All fields are required");
         }
         const user = yield userModel_1.default.findOne({ email });
-        if (!user || !user.comparePassword(password)) {
-            return (0, response_1.errorResponse)(res, 400, "Invalid credentials");
+        if (!user) {
+            return (0, response_1.errorResponse)(res, 400, "User not  found");
+        }
+        const isMatch = yield (0, comparePassward_1.comparePassword)(password, user.password);
+        if (!isMatch) {
+            return (0, response_1.errorResponse)(res, 400, "Invalid Password");
         }
         const payload = {
             id: user._id,
             email: user.email,
         };
-        const token = jsonwebtoken_1.default.sign(payload, process.env.JWT_SECRET, {
-            expiresIn: "1d",
-        });
-        res.cookie("token", token, {
-            expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-            httpOnly: true,
-        });
+        const token = yield (0, JwtHelper_1.generateToken)(payload);
         return (0, response_1.successResponse)(res, 200, "Login successful", token);
     }
     catch (error) {
         (0, response_1.handleError)(req, error);
-        return (0, response_1.errorResponse)(res, 500, 'Server error.');
+        return (0, response_1.errorResponse)(res, 500, "Server error.");
     }
 });
 exports.login = login;

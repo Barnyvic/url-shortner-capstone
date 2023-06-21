@@ -3,6 +3,8 @@ import { Request, Response } from "express";
 import { errorResponse, handleError, successResponse } from '../utils/response';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import { comparePassword } from "../helper/comparePassward";
+import { generateToken } from "../helper/JwtHelper";
 
 
 
@@ -40,42 +42,35 @@ export const register = async (req: Request, res: Response) => {
     }
 
 export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
 
-     try {
-        
+    if (!email || !password) {
+      return errorResponse(res, 400, "All fields are required");
+    }
 
-         const { email, password } = req.body;
+    const user = await User.findOne({ email });
 
-          if(!email || !password) {
-            return errorResponse(res, 400, "All fields are required");
-        }
+    if (!user) {
+      return errorResponse(res, 400, "User not  found");
+    }
 
-      const user = await User.findOne({ email });
+    const isMatch = await comparePassword(password, user.password);
 
-      if(!user || !user.comparePassword(password) ) {
-        return errorResponse(res, 400, "Invalid credentials");
-      }
+    if (!isMatch) {
+      return errorResponse(res, 400, "Invalid Password");
+    }
 
-      const payload = {
-        id: user._id,
-        email: user.email,
-      };
+    const payload = {
+      id: user._id,
+      email: user.email,
+    };
 
-        const token = jwt.sign(payload, process.env.JWT_SECRET as string, {
-        expiresIn: "1d",
-        });
+    const token = await generateToken(payload);
 
-        res.cookie("token", token, {
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-        httpOnly: true,
-        });
-
-        return successResponse(res, 200, "Login successful", token);
-
-     } catch (error) {
-            handleError(req, error);
-            return errorResponse(res, 500, 'Server error.');
-     }
-
-
-}
+    return successResponse(res, 200, "Login successful", token);
+  } catch (error) {
+    handleError(req, error);
+    return errorResponse(res, 500, "Server error.");
+  }
+};
