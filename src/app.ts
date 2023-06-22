@@ -7,6 +7,7 @@ import shortUrlRouter from "./router/shortUrl.router";
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cors = require('cors');
 
+
 const app: Express = express();
 app.use(helmet());
 app.use(logger("dev"));
@@ -18,11 +19,6 @@ app.use(
   })
 );
 
-const allowedOrigins = [
-  "http://localhost:5173",
-  "https://xutters.vercel.app"
-];
-
 
 
 app.use(
@@ -30,7 +26,8 @@ app.use(
     credentials: true,
     optionsSuccessStatus: 200,
     origin: [
-       allowedOrigins
+       "http://localhost:5173",
+      "https://xutters.vercel.app"
     ],
   }),
 );
