@@ -18,12 +18,25 @@ app.use(
   })
 );
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://xutters.vercel.app"
+];
+
 // cors
-app.use(cors(
-  {
-    origin: '*',
-  }
-));
+const corsOptions = {
+  // eslint-disable-next-line @typescript-eslint/ban-types
+  origin: (origin: string, callback: Function) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+};
+
+app.use(cors(corsOptions));
+
 
 
 app.use(express.json());
