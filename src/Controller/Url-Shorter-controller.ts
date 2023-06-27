@@ -7,6 +7,39 @@ import { IRequest, errorResponse, handleError, successResponse } from '../utils/
 import client from '../Config/redis';
 import qrcode from 'qrcode';
 
+/**
+ * @swagger
+ * /api/v1/shorturl:
+ *   post:
+ *     summary: Create a short URL
+ *     tags: [ShortURL]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               longUrl:
+ *                 type: string
+ *               customedUrl:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: URL created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 shortUrl:
+ *                   type: string
+ *       400:
+ *         description: Invalid long URL
+ *       500:
+ *         description: Server error
+ */
+
 export const createShortUrl = async (req:  IRequest, res: Response) => {
     try {
         //get the long longurl and customed url from the request body
@@ -34,20 +67,20 @@ export const createShortUrl = async (req:  IRequest, res: Response) => {
             if (user) {
                 generatedShortUrl = await ShortUrl.create({
                     longUrl,
-                    shortUrl: customedUrl || shortid.generate(),
+                    shortUrl: customedUrl ? customedUrl : shortid.generate(),
                     userId: user._id,
                 });
             } else {
                 generatedShortUrl = await ShortUrl.create({
                     longUrl,
-                    shortUrl: customedUrl || shortid.generate(),
+                    shortUrl: customedUrl ? customedUrl : shortid.generate(),
                     userId: user._id,
                 });
             }
         } else {
             generatedShortUrl = await ShortUrl.create({
                 longUrl,
-                shortUrl: customedUrl || shortid.generate(),
+                shortUrl: customedUrl ? customedUrl : shortid.generate(),
                 userId: userId,
             });
         }
@@ -66,6 +99,26 @@ export const createShortUrl = async (req:  IRequest, res: Response) => {
         return errorResponse(res, 500, 'Server error.');
     }
 };
+
+/**
+ * @swagger
+ * /api/v1/shorturl/{shortCodeID}:
+ *   get:
+ *     summary: Redirect to the long URL associated with the short code
+ *     tags: [ShortURL]
+ *     parameters:
+ *       - in: path
+ *         name: shortCodeID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Short code for the URL
+ *     responses:
+ *       302:
+ *         description: Redirect to the long URL
+ *       404:
+ *         description: URL not found
+ */
 
 export const getShortUrl = async (req: Request, res: Response) => {
     const { shortCodeID } = req.params;
@@ -88,6 +141,33 @@ export const getShortUrl = async (req: Request, res: Response) => {
     }
 };
 
+/**
+ * @swagger
+ * /api/v1/shorturl/{shortCodeID}/qrcode:
+ *   get:
+ *     summary: Get the QR code for the short URL
+ *     tags: [ShortURL]
+ *     parameters:
+ *       - in: path
+ *         name: shortCodeID
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Short code for the URL
+ *     responses:
+ *       200:
+ *         description: QR code image
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 qrCode:
+ *                   type: string
+ *       404:
+ *         description: URL not found
+ */
+
 export const getShortUrlQRCode = async (req: Request, res: Response) => {
     const { shortCodeID } = req.params;
 
@@ -103,6 +183,30 @@ export const getShortUrlQRCode = async (req: Request, res: Response) => {
     shortUrl.save();
     return successResponse(res, 200, 'QR Code', qrCode);
 };
+
+/**
+ * @swagger
+ * /api/v1/shorturl/history:
+ *   get:
+ *     summary: Get the history of short URLs created by the user
+ *     tags: [ShortURL]
+ *     responses:
+ *       200:
+ *         description: Short URLs history
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 shortUrls:
+ *                   type: array
+ *                   items:
+ *                     $ref: '#/components/schemas/ShortURL'
+ *       404:
+ *         description: No short URLs found
+ *       500:
+ *         description: Server error
+ */
 
 //get all the shortUrls created by the user
 export const getUserHistory = async (req: IRequest, res: Response) => {

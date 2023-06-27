@@ -2,10 +2,43 @@ import User from "../model/userModel";
 import { Request, Response } from "express";
 import { errorResponse, handleError, successResponse } from '../utils/response';
 import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
 import { comparePassword } from "../helper/comparePassward";
 import { generateToken } from "../helper/JwtHelper";
 
+/**
+ * @swagger
+ * /api/v1/auth/register:
+ *   post:
+ *     summary: Register a user
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *               fullName:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: User created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   $ref: '#/components/schemas/User'
+ *       400:
+ *         description: All fields are required
+ *       500:
+ *         description: Server error
+ */
 
 
 export const register = async (req: Request, res: Response) => {
@@ -40,6 +73,40 @@ export const register = async (req: Request, res: Response) => {
         return errorResponse(res, 500, 'Server error.');
     }
     }
+
+  
+    /**
+ * @swagger
+ * /api/v1/auth/login:
+ *   post:
+ *     summary: User login
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 token:
+ *                   type: string
+ *       400:
+ *         description: Bad request
+ *       500:
+ *         description: Server error
+ */
 
 export const login = async (req: Request, res: Response) => {
   try {

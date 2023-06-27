@@ -4,8 +4,14 @@ import helmet from "helmet";
 import cookieParser from "cookie-parser";
 import rateLimit from "express-rate-limit";
 import shortUrlRouter from "./router/shortUrl.router";
+import swaggerUi from 'swagger-ui-express';
+import swaggerJsdoc from 'swagger-jsdoc';
+import options from './swagger';
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const cors = require('cors');
+
+
+
 
 
 const app: Express = express();
@@ -18,6 +24,10 @@ app.use(
     message: "Too many requests from this IP, please try again later",
   })
 );
+
+const specs = swaggerJsdoc(options);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 
 
