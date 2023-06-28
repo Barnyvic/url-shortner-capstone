@@ -12,6 +12,9 @@ const options: OpenAPIV3.Options = {
             {
                 url: 'http://localhost:5000',
             },
+            {
+                url: 'https://barny.cyclic.app',
+            }
         ],
     },
     apis: ['./src/Controller/*.ts'],
