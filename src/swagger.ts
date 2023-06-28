@@ -14,7 +14,12 @@ const options: OpenAPIV3.Options = {
             },
             {
                 url: 'https://barny.cyclic.app',
-            }
+            },
+        ],
+         security: [
+            {
+                bearerAuth: [], // Example: Bearer token authentication
+            },
         ],
     },
     apis: ['./src/Controller/*.ts'],
